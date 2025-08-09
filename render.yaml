@@ -8,9 +8,11 @@ services:
   region: oregon
   plan: starter
   rootDir: dcp-portal
-  buildCommand: npm ci && npm run build
+  buildCommand: npm install --no-audit --no-fund && npm run build
   startCommand: npm start
   envVars:
+  - key: NODE_VERSION
+    value: "20.11.1"
   - key: CENTRAL_BASE_URL
     sync: false
   - key: CENTRAL_AUTH_SCHEME
@@ -20,20 +22,11 @@ services:
   - key: PORTAL_PUBLIC_BASE_URL
     value: ${RENDER_EXTERNAL_URL}
   - key: IMPORTER_INTERNAL_HOSTPORT
-    fromService:
-      name: dcp-importer
-      type: pserv
-      property: hostport
+    fromService: { name: dcp-importer, type: pserv, property: hostport }
   - key: CLEANER_INTERNAL_HOSTPORT
-    fromService:
-      name: dcp-cleaner
-      type: pserv
-      property: hostport
+    fromService: { name: dcp-cleaner, type: pserv, property: hostport }
   - key: INTEGRATIONS_INTERNAL_HOSTPORT
-    fromService:
-      name: dcp-integrations
-      type: pserv
-      property: hostport
+    fromService: { name: dcp-integrations, type: pserv, property: hostport }
   healthCheckPath: /
 
 - type: pserv
