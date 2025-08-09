@@ -1,0 +1,48 @@
+previews: { generation: manual }
+services:
+  - type: web
+    name: dcp-portal
+    runtime: docker
+    plan: starter
+    region: oregon
+    rootDir: dcp-portal
+    envVars:
+      - key: CENTRAL_BASE_URL
+        sync: false
+      - key: CENTRAL_AUTH_SCHEME
+        value: Bearer
+      - key: CENTRAL_TOKEN
+        sync: false
+      - key: IMPORTER_INTERNAL_HOSTPORT
+        fromService: { name: dcp-importer, type: pserv, property: hostport }
+      - key: CLEANER_INTERNAL_HOSTPORT
+        fromService: { name: dcp-cleaner, type: pserv, property: hostport }
+      - key: INTEGRATIONS_INTERNAL_HOSTPORT
+        fromService: { name: dcp-integrations, type: pserv, property: hostport }
+      - key: PORTAL_PUBLIC_BASE_URL
+        value: ${RENDER_EXTERNAL_URL}
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /
+    autoDeploy: true
+  - type: pserv
+    name: dcp-cleaner
+    runtime: docker
+    plan: starter
+    region: oregon
+    rootDir: dcp-cleaner
+    envVars: [ { key: PORT, value: 10000 } ]
+  - type: pserv
+    name: dcp-importer
+    runtime: docker
+    plan: starter
+    region: oregon
+    rootDir: dcp-importer
+    envVars: [ { key: PORT, value: 10000 } ]
+  - type: pserv
+    name: dcp-integrations
+    runtime: docker
+    plan: starter
+    region: oregon
+    rootDir: dcp-integrations
+    envVars: [ { key: PORT, value: 10000 } ]

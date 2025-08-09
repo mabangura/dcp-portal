@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  proxy:
+    image: caddy:2
+    ports: ["8080:8080"]
+    volumes: [ "./caddy/Caddyfile:/etc/caddy/Caddyfile:ro" ]
+    depends_on: [ portal, cleaner, importer, integrations ]
+  portal:
+    build: { context: ../dcp-portal }
+    environment:
+      - CENTRAL_BASE_URL=${CENTRAL_BASE_URL}
+      - CENTRAL_AUTH_SCHEME=${CENTRAL_AUTH_SCHEME}
+      - CENTRAL_TOKEN=${CENTRAL_TOKEN}
+      - IMPORTER_INTERNAL_HOSTPORT=importer:9000
+      - CLEANER_INTERNAL_HOSTPORT=cleaner:8000
+      - INTEGRATIONS_INTERNAL_HOSTPORT=integrations:9100
+      - PORTAL_PUBLIC_BASE_URL=http://localhost:8080
+      - NODE_ENV=production
+  cleaner:
+    build: { context: ../dcp-cleaner }
+  importer:
+    build: { context: ../dcp-importer }
+  integrations:
+    build: { context: ../dcp-integrations }

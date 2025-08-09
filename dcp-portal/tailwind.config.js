@@ -1,0 +1,1 @@
+/** @type {import('tailwindcss').Config} */module.exports={content:["./app/**/*.{ts,tsx}","./components/**/*.{ts,tsx}"],theme:{extend:{colors:{primary:{DEFAULT:"#2563EB"},accent:{DEFAULT:"#10B981"}},borderRadius:{'2xl':'1rem'}}},plugins:[]};
