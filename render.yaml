@@ -1,11 +1,16 @@
+# render.yaml — Managed runtimes (no Docker builds)
 previews: { generation: manual }
+
 services:
+  # Public Next.js portal
   - type: web
     name: dcp-portal
-    runtime: docker
-    plan: starter
+    runtime: node
     region: oregon
+    plan: starter
     rootDir: dcp-portal
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
     envVars:
       - key: CENTRAL_BASE_URL
         sync: false
@@ -13,36 +18,44 @@ services:
         value: Bearer
       - key: CENTRAL_TOKEN
         sync: false
+      - key: PORTAL_PUBLIC_BASE_URL
+        value: ${RENDER_EXTERNAL_URL}
+      # internal links to private services
       - key: IMPORTER_INTERNAL_HOSTPORT
         fromService: { name: dcp-importer, type: pserv, property: hostport }
       - key: CLEANER_INTERNAL_HOSTPORT
         fromService: { name: dcp-cleaner, type: pserv, property: hostport }
       - key: INTEGRATIONS_INTERNAL_HOSTPORT
         fromService: { name: dcp-integrations, type: pserv, property: hostport }
-      - key: PORTAL_PUBLIC_BASE_URL
-        value: ${RENDER_EXTERNAL_URL}
-      - key: NODE_ENV
-        value: production
     healthCheckPath: /
-    autoDeploy: true
+
+  # Private FastAPI services (managed Python)
   - type: pserv
     name: dcp-cleaner
-    runtime: docker
-    plan: starter
+    runtime: python
     region: oregon
+    plan: starter
     rootDir: dcp-cleaner
-    envVars: [ { key: PORT, value: 10000 } ]
+    pythonVersion: 3.11.9
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
   - type: pserv
     name: dcp-importer
-    runtime: docker
-    plan: starter
+    runtime: python
     region: oregon
+    plan: starter
     rootDir: dcp-importer
-    envVars: [ { key: PORT, value: 10000 } ]
+    pythonVersion: 3.11.9
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
   - type: pserv
     name: dcp-integrations
-    runtime: docker
-    plan: starter
+    runtime: python
     region: oregon
+    plan: starter
     rootDir: dcp-integrations
-    envVars: [ { key: PORT, value: 10000 } ]
+    pythonVersion: 3.11.9
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
