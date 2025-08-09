@@ -1,46 +1,42 @@
-# render.yaml — Managed runtimes (no Docker builds)
-previews: { generation: manual }
+previews:
+  generation: manual
 
 services:
-  # Public Next.js portal
-  - type: web
-    name: dcp-portal
-    runtime: node
-    region: oregon
-    plan: starter
-    rootDir: dcp-portal
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
-    envVars:
-      - key: CENTRAL_BASE_URL
-        sync: false
-      - key: CENTRAL_AUTH_SCHEME
-        value: Bearer
-      - key: CENTRAL_TOKEN
-        sync: false
-      - key: PORTAL_PUBLIC_BASE_URL
-        value: ${RENDER_EXTERNAL_URL}
-      # internal links to private services
-      - key: IMPORTER_INTERNAL_HOSTPORT
-        fromService: { name: dcp-importer, type: pserv, property: hostport }
-      - key: CLEANER_INTERNAL_HOSTPORT
-        fromService: { name: dcp-cleaner, type: pserv, property: hostport }
-      - key: INTEGRATIONS_INTERNAL_HOSTPORT
-        fromService: { name: dcp-integrations, type: pserv, property: hostport }
-    healthCheckPath: /
+- type: web
+  name: dcp-portal
+  runtime: node
+  region: oregon
+  plan: starter
+  rootDir: dcp-portal
+  buildCommand: npm ci && npm run build
+  startCommand: npm start
+  envVars:
+  - key: CENTRAL_BASE_URL
+    sync: false
+  - key: CENTRAL_AUTH_SCHEME
+    value: Bearer
+  - key: CENTRAL_TOKEN
+    sync: false
+  - key: PORTAL_PUBLIC_BASE_URL
+    value: ${RENDER_EXTERNAL_URL}
+  - key: IMPORTER_INTERNAL_HOSTPORT
+    fromService:
+      name: dcp-importer
+      type: pserv
+      property: hostport
+  - key: CLEANER_INTERNAL_HOSTPORT
+    fromService:
+      name: dcp-cleaner
+      type: pserv
+      property: hostport
+  - key: INTEGRATIONS_INTERNAL_HOSTPORT
+    fromService:
+      name: dcp-integrations
+      type: pserv
+      property: hostport
+  healthCheckPath: /
 
-  # Private FastAPI services (managed Python)
-  - type: pserv
-    name: dcp-cleaner
-    runtime: python
-    region: oregon
-    plan: starter
-    rootDir: dcp-cleaner
-    pythonVersion: 3.11.9
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-
-  - type: pserv
+- type: pserv
   name: dcp-cleaner
   runtime: python
   region: oregon
@@ -49,18 +45,29 @@ services:
   buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
   startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
   envVars:
-    - key: PYTHON_VERSION
-      value: 3.11.9
+  - key: PYTHON_VERSION
+    value: "3.11.9"
 
-
-  - type: pserv
-  name: dcp-cleaner
+- type: pserv
+  name: dcp-importer
   runtime: python
   region: oregon
   plan: starter
-  rootDir: dcp-cleaner
+  rootDir: dcp-importer
   buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
   startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
   envVars:
-    - key: PYTHON_VERSION
-      value: 3.11.9
+  - key: PYTHON_VERSION
+    value: "3.11.9"
+
+- type: pserv
+  name: dcp-integrations
+  runtime: python
+  region: oregon
+  plan: starter
+  rootDir: dcp-integrations
+  buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+  startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+  envVars:
+  - key: PYTHON_VERSION
+    value: "3.11.9"
