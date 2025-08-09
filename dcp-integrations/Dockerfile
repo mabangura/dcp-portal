@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11.9-slim
 WORKDIR /app
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip setuptools wheel &&     pip install --no-cache-dir --prefer-binary -r requirements.txt
